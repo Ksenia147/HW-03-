@@ -1,5 +1,5 @@
 {% extends 'flatpages/default.html' %}
-
+{% load censor %}
 {% block title %}
 Post
 {% endblock title %}
@@ -20,7 +20,7 @@ Post
            <tr>
                <td>{{ p.title }}</td>
                <td>{{ p.created_at|date:'d M Y' }}</td>
-               <td>{{ p.content|truncatechars:20 }}</td>
+               <td>{{ p.content|truncatechars:20|censor }}</td>
            </tr>
            {% endfor %}
 
