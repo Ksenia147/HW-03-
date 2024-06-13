@@ -1,5 +1,6 @@
 {% extends 'flatpages/default.html' %}
 {% load censor %}
+{%load tags %}
 {% block title %}
 Post
 {% endblock title %}
@@ -7,6 +8,7 @@ Post
 {% block content %}
    <h1>Все новости</h1>
     <h3>{{ posts|length }}</h3>
+
    <hr>
    {% if posts %}
        <table>
@@ -14,6 +16,7 @@ Post
                <td>Заголовок</td>
                <td>Дата публикации</td>
                <td>Содержание</td>
+               <td>Тип</td>
            </tr>
 
            {% for p in posts %}
@@ -21,6 +24,7 @@ Post
                <td>{{ p.title }}</td>
                <td>{{ p.created_at|date:'d M Y' }}</td>
                <td>{{ p.content|truncatechars:20|censor }}</td>
+               <td>{{ p.post_type }}</td>
            </tr>
            {% endfor %}
 
@@ -28,4 +32,26 @@ Post
    {% else %}
        <h2>Новостей нет!</h2>
    {% endif %}
+
+    {# Добавляем пагинацию на страницу #}
+
+   {% if page_obj.has_previous %}
+       {# Для каждой ссылки пагинации указываем обработку через новый тег #}
+       <a href="?{% url_replace page=1 %}">1</a>
+       {% if page_obj.previous_page_number != 1 %}
+           ...
+           <a href="?{% url_replace page=page_obj.previous_page_number %}">{{ page_obj.previous_page_number }}</a>
+       {% endif %}
+   {% endif %}
+
+   {{ page_obj.number }}
+
+   {% if page_obj.has_next %}
+       <a href="?{% url_replace page=page_obj.next_page_number %}">{{ page_obj.next_page_number }}</a>
+       {% if paginator.num_pages != page_obj.next_page_number %}
+           ...
+           <a href="?{% url_replace page=page_obj.paginator.num_pages %}">{{ page_obj.paginator.num_pages }}</a>
+       {% endif %}
+   {% endif %}
+
 {% endblock content %}
