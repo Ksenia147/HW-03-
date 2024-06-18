@@ -141,7 +141,8 @@ ACCOUNT_USERNAME_REQUIRED = False
 ACCOUNT_AUTHENTICATION_METHOD = 'email'
 ACCOUNT_EMAIL_VERIFICATION = 'none'
 ACCOUNT_FORMS = {'signup': 'news.forms.CommonSignupForm'}
-
+SOCIALACCOUNT_FORMS = {'signup': 'news.forms.CommonSocialSignupForm'}
+SOCIALACCOUNT_AUTO_SIGNUP = False
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/

@@ -9,14 +9,8 @@ Post
    <h1>Все новости</h1>
     <h3>{{ posts|length }}</h3>
 
-{% if request.user.is_authenticated %}
-    {% if is_not_author %}
-        <button> <a href="upgrade/"> Стать автором!</a> </button>
-    {% endif %}
-{% endif %}
 
-
-
+    <button> <a href="upgrade/"> Стать автором!</a> </button>
 
    <hr>
    {% if posts %}

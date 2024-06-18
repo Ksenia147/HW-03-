@@ -1,5 +1,5 @@
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView, TemplateView
@@ -61,7 +61,8 @@ class PostSearch(ListView):
         context['filterset'] = self.filterset
         return context
 
-class PostCreate(CreateView):
+class PostCreate(PermissionRequiredMixin, CreateView):
+    permission_required = ('News.add_post',)
     form_class = PostForm
     model = Post
     template_name = 'create_post.html'
@@ -75,7 +76,8 @@ class PostCreate(CreateView):
         post.save()
         return super().form_valid(form)
 
-class PostUpdate(LoginRequiredMixin, UpdateView):
+class PostUpdate(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
+    permission_required = ('News.change_post',)
     form_class = PostForm
     model = Post
     template_name = 'create_post.html'
