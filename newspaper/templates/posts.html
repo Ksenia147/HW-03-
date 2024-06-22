@@ -19,6 +19,7 @@ Post
                <td>Заголовок</td>
                <td>Дата публикации</td>
                <td>Содержание</td>
+               <td>Категории</td>
                <td>Тип</td>
            </tr>
 
@@ -27,6 +28,11 @@ Post
                <td>{{ p.title }}</td>
                <td>{{ p.created_at|date:'d M Y' }}</td>
                <td>{{ p.content|truncatechars:20|censor }}</td>
+               <td>
+                {% for category in p.categories.all %}
+                    <a href="{% url 'category_list' category.id %}">{{ category }}</a>
+                {% endfor %}
+                </td>
                <td>{{ p.post_type }}</td>
            </tr>
            {% endfor %}
