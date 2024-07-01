@@ -1,5 +1,7 @@
 import logging
-from datetime import datetime
+import datetime
+import time
+from datetime import datetime, date, time, timedelta
 
 from django.conf import settings
 
@@ -18,10 +20,10 @@ logger = logging.getLogger(__name__)
 
 # наша задача по выводу текста на экран
 def my_job():
-    today = datetime.datetime.now()
-    last_week = today - datetime.timedelta(days=7)
+    today = datetime.now()
+    last_week = today - timedelta(days=7)
     posts = Post.objects.filter(created_at__gte = last_week)
-    categories = set(posts.values_list('category__name', flat=True))
+    categories = set(posts.values_list('categories__name', flat=True))
     subscribers = set(Category.objects.filter(name__in= categories).values_list('subscribers__email', flat=True))
     html_content = render_to_string(
         'daily_news.html',
@@ -58,7 +60,7 @@ class Command(BaseCommand):
         # добавляем работу нашему задачнику
         scheduler.add_job(
             my_job,
-            trigger=CronTrigger(second="*/10"),
+            trigger=CronTrigger(day_of_week="mon", hour="16", minute="45"),
             # То же, что и интервал, но задача тригера таким образом более понятна django
             id="my_job",  # уникальный айди
             max_instances=1,
@@ -69,7 +71,7 @@ class Command(BaseCommand):
         scheduler.add_job(
             delete_old_job_executions,
             trigger=CronTrigger(
-                day_of_week="sat", hour="21", minute="47"
+                day_of_week="mon", hour="16", minute="45"
             ),
             # Каждую неделю будут удаляться старые задачи, которые либо не удалось выполнить, либо уже выполнять не надо.
             id="delete_old_job_executions",
