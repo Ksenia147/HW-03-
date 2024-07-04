@@ -10,8 +10,6 @@
 {% block content %}
 {% if is_not_subscriber %}
 <button style="margin: 10px"> <a href="{% url 'subscribe' category.id %}"> Подписаться на категорию {{ category }}</a> </button>
-{% else %}
-<button style="margin: 10px"> <a href="{% url 'unsubscribe' category.id %}"> Отписаться от категории {{ category }}</a> </button>
 {% endif %}
     <h1>Все публикации в категории {{ category }}</h1>
     <hr>
