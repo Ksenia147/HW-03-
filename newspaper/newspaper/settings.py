@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 
 from pathlib import Path
 import os
+import logging
 from dotenv import load_dotenv, find_dotenv
 
 load_dotenv(find_dotenv())
@@ -27,7 +28,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-!2ubp=$*hm-n@6s%b327o*(6gk+81lf7d@*c%q-)l7sestr9&@'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['127.0.0.1']
 
@@ -172,6 +173,13 @@ CELERY_RESULT_SERIALIZER = 'json'
 
 STATIC_URL = 'static/'
 
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
+        'LOCATION': os.path.join(BASE_DIR, 'cache_files'), # Указываем, куда будем сохранять кэшируемые файлы! Не забываем создать папку cache_files внутри папки с manage.py!
+    }
+}
+
 
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
@@ -179,6 +187,132 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 STATICFILES_DIRS = [
     BASE_DIR / "static"
 ]
+
+class DebugFilter(logging.Filter):
+    def filter(self, record):
+        return DEBUG
+
+class ProductionFilter(logging.Filter):
+    def filter(self, record):
+        return not DEBUG
+
+ADMINS = [("Ksenia", "bogacevaksenia147@gmail.com")]
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'style': '{',
+    'formatters': {
+        'standard': {
+            'format': '%(asctime)s %(levelname)s %(message)s'
+        },
+        'with_pathname': {
+            'format': '%(asctime)s %(levelname)s %(message)s %(pathname)s'
+        },
+        'with_stack': {
+            'format': '%(asctime)s %(levelname)s %(message)s %(pathname)s %(exc_info)s'
+        },
+        'file': {
+            'format': '%(asctime)s %(levelname)s %(module)s %(message)s'
+        },
+
+    },
+    'filters': {
+        'require_debug_true': {
+            '()': 'django.utils.log.RequireDebugTrue',
+        },
+        'debug_filter': {
+            '()': 'newspaper.settings.DebugFilter',
+        },
+        'production_filter': {
+            '()': 'newspaper.settings.ProductionFilter',
+        },
+    },
+    'handlers': {
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+            'formatter': 'standard',
+            'filters': ['debug_filter']
+        },
+        'console_warning': {
+            'level': 'WARNING',
+            'class': 'logging.StreamHandler',
+            'formatter': 'with_pathname',
+            'filters': ['debug_filter'],
+        },
+        'console_error': {
+            'level': 'ERROR',
+            'class': 'logging.StreamHandler',
+            'formatter': 'with_stack',
+            'filters': ['debug_filter'],
+        },
+        'file': {
+            'level': 'INFO',
+            'class': 'logging.FileHandler',
+            'filename': 'general.log',
+            'formatter': 'file',
+            'filters': ['production_filter']
+        },
+        'error_file': {
+            'level': 'ERROR',
+            'class': 'logging.FileHandler',
+            'filename': 'errors.log',
+            'formatter': 'with_stack',
+            'filters': ['production_filter']
+        },
+        'security_file': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': 'security.log',
+            'formatter': 'file',
+            'filters': ['production_filter']
+        },
+        'email': {
+            'level': 'ERROR',
+            'class': 'logging.handlers.SMTPHandler',
+            'mailhost': 'EMAIL_HOST',
+            'fromaddr': 'DEFAULT_FROM_EMAIL',
+            'toaddrs': ['DEFAULT_FROM_EMAIL'],
+            'subject': 'Error Log from Django',
+            'formatter': 'with_pathname',
+            'credentials': ('EMAIL_HOST_USER', 'EMAIL_HOST_PASSWORD'),
+            'filters': ['production_filter']
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console', 'console_warning', 'console_error', 'file'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+        'django.request': {
+            'handlers': ['error_file', 'email'],
+            'level': 'ERROR',
+            'propagate': False,
+        },
+        'django.server': {
+            'handlers': ['error_file', 'email'],
+            'level': 'ERROR',
+            'propagate': False,
+        },
+        'django.template': {
+            'handlers': ['error_file'],
+            'level': 'ERROR',
+            'propagate': False,
+        },
+        'django.db.backends': {
+            'handlers': ['error_file'],
+            'level': 'ERROR',
+            'propagate': False,
+        },
+        'django.security': {
+            'handlers': ['security_file'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+    },
+}
 
 from django.core.mail import send_mail
 from django.conf import settings
